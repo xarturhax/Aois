@@ -114,18 +114,25 @@ class TestDivision:
     def test_positive_numbers(self):
         binary, decimal = divide_direct_code(10, 2)
         assert decimal == 5.0
+        assert binary == '101.00000'  # Проверяем целую часть
 
     def test_negative_numbers(self):
         binary, decimal = divide_direct_code(-10, 2)
         assert decimal == -5.0
+        assert binary == '101.00000'  # Проверяем целую часть
 
     def test_fractional_result(self):
         binary, decimal = divide_direct_code(10, 3)
-        # Проверяем с большей допустимой погрешностью
-        assert abs(decimal - 3.33333) < 0.01  # Увеличили допустимую погрешность
+        # Проверяем точность с учетом правильного округления
+        assert abs(decimal - 3.33333) < 1e-5
+        # Проверяем формат бинарного результата
+        assert binary == '11.01010'  # 3.3125 в двоичной системе
+        # Проверяем точность дробной части
+        assert len(binary.split('.')[1]) == 5
 
-        # Альтернативный вариант - проверять первые 5 знаков после запятой
-        assert f"{decimal:.5f}" == "3.33333"
+    def test_division_by_zero(self):
+        with pytest.raises(ZeroDivisionError):
+            divide_direct_code(10, 0)
 
 class TestFloatIEEE754:
     def test_positive_float(self):
