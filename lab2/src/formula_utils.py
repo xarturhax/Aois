@@ -1,53 +1,51 @@
-from typing import Dict, List
-from src.config import LOGIC_OPERATORS
+import re
+from typing import List
 
-def validate_formula(formula: str) -> bool:
-    """Check if the formula contains only valid characters."""
-    valid_chars = set("abcde|&!~->()")
-    return all(char in valid_chars for char in formula)
+def check_formula_validity(formula: str) -> bool:
+    """Проверяет, содержит ли формула только допустимые символы."""
+    pattern = r'^[a-zA-Z|&!~>\-() ]+$'
+    return bool(re.match(pattern, formula))
 
-def build_cnf(table: Dict[int, List], variables: List[str]) -> str:
-    """Construct Conjunctive Normal Form (CNF) from truth table."""
-    terms = []
-    for i in range(len(table)):
-        if table[i][-1] == 0:
-            term = [f"({'!' if table[i][j] else ''}{variables[j]})" for j in range(len(variables))]
-            terms.append(f"({'|'.join(term)})")
-    return "&".join(terms) if terms else ""
+def construct_cnf(table: List[List[int]], vars: List[str]) -> str:
+    """Строит конъюнктивную нормальную форму (КНФ) из таблицы истинности."""
+    clauses = [
+        f"({'|'.join([f'{'!' if row[j] else ''}{vars[j]}' for j in range(len(vars))])})"
+        for row in table if row[-1] == 0
+    ]
+    return '&'.join(clauses) if clauses else ''
 
-def build_dnf(table: Dict[int, List], variables: List[str]) -> str:
-    """Construct Disjunctive Normal Form (DNF) from truth table."""
-    terms = []
-    for i in range(len(table)):
-        if table[i][-1] == 1:
-            term = [f"({'!' if not table[i][j] else ''}{variables[j]})" for j in range(len(variables))]
-            terms.append(f"({'&'.join(term)})")
-    return "|".join(terms) if terms else ""
+def construct_dnf(table: List[List[int]], vars: List[str]) -> str:
+    """Строит дизъюнктивную нормальную форму (ДНФ) из таблицы истинности."""
+    clauses = [
+        f"({'&'.join([f'{'!' if not row[j] else ''}{vars[j]}' for j in range(len(vars))])})"
+        for row in table if row[-1] == 1
+    ]
+    return '|'.join(clauses) if clauses else ''
 
-def binary_cnf(table: Dict[int, List], variables: List[str]) -> str:
-    """Generate binary form of CNF."""
-    terms = [''.join(map(str, table[i][:-1])) for i in range(len(table)) if table[i][-1] == 0]
+def cnf_binary_form(table: List[List[int]], vars: List[str]) -> str:
+    """Генерирует бинарное представление КНФ."""
+    terms = [''.join(map(str, row[:-1])) for row in table if row[-1] == 0]
     return f"&({','.join(terms)})" if terms else "&()"
 
-def decimal_cnf(table: Dict[int, List], variables: List[str]) -> str:
-    """Generate decimal form of CNF."""
-    terms = [to_decimal(''.join(map(str, table[i][:-1]))) for i in range(len(table)) if table[i][-1] == 0]
-    return f"&({','.join(map(str, terms))})" if terms else "&()"
+def cnf_decimal_form(table: List[List[int]], vars: List[str]) -> str:
+    """Генерирует десятичное представление КНФ."""
+    terms = [convert_to_decimal(''.join(map(str, row[:-1]))) for row in table if row[-1] == 0]
+    return f"&({','.join(terms)})" if terms else "&()"
 
-def binary_dnf(table: Dict[int, List], variables: List[str]) -> str:
-    """Generate binary form of DNF."""
-    terms = [''.join(map(str, table[i][:-1])) for i in range(len(table)) if table[i][-1] == 1]
+def dnf_binary_form(table: List[List[int]], vars: List[str]) -> str:
+    """Генерирует бинарное представление ДНФ."""
+    terms = [''.join(map(str, row[:-1])) for row in table if row[-1] == 1]
     return f"|({','.join(terms)})" if terms else "|()"
 
-def decimal_dnf(table: Dict[int, List], variables: List[str]) -> str:
-    """Generate decimal form of DNF."""
-    terms = [to_decimal(''.join(map(str, table[i][:-1]))) for i in range(len(table)) if table[i][-1] == 1]
-    return f"|({','.join(map(str, terms))})" if terms else "|()"
+def dnf_decimal_form(table: List[List[int]], vars: List[str]) -> str:
+    """Генерирует десятичное представление ДНФ."""
+    terms = [convert_to_decimal(''.join(map(str, row[:-1]))) for row in table if row[-1] == 1]
+    return f"|({','.join(terms)})" if terms else "|()"
 
-def binary_index(table: Dict[int, List]) -> str:
-    """Generate binary index form."""
-    return ''.join(str(table[i][-1]) for i in range(len(table)))
+def get_binary_index(table: List[List[int]]) -> str:
+    """Генерирует бинарный индекс из результатов таблицы истинности."""
+    return ''.join(str(row[-1]) for row in table)
 
-def to_decimal(binary: str) -> str:
-    """Convert binary string to decimal."""
-    return str(sum(2 ** i for i, bit in enumerate(reversed(binary)) if bit == "1"))
+def convert_to_decimal(binary: str) -> str:
+    """Преобразует бинарную строку в десятичное число."""
+    return str(int(binary, 2)) if binary else '0'
