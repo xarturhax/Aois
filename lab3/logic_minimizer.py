@@ -273,6 +273,8 @@ def get_kmap_dimensions(num_vars):
         return 2, 4, 1, 2
     elif num_vars == 4:
         return 4, 4, 2, 2
+    elif num_vars == 5:  # Добавлена поддержка 5 переменных
+        return 4, 8, 2, 3  # 4 строки, 8 столбцов
     else:
         return None, None, None, None
 
