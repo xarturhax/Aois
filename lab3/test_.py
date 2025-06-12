@@ -325,14 +325,6 @@ def test_minimize_with_table():
     assert len(table) >= 1
 
 
-def test_get_kmap_dimensions():
-    assert get_kmap_dimensions(1) == (1, 2, 0, 1)
-    assert get_kmap_dimensions(2) == (2, 2, 1, 1)
-    assert get_kmap_dimensions(3) == (2, 4, 1, 2)
-    assert get_kmap_dimensions(4) == (4, 4, 2, 2)
-    assert get_kmap_dimensions(5) == (None, None, None, None)
-
-
 def test_gray_code():
     assert gray_code(2) == ['00', '01', '11', '10']
     assert gray_code(1) == ['0', '1']
@@ -375,6 +367,23 @@ def test_full_workflow():
     minimized, steps = minimize_expression(minterms, True)
     assert len(minimized) >= 1
 
+
+def test_get_kmap_dimensions():
+    # Тестируем все поддерживаемые размерности
+    assert get_kmap_dimensions(1) == (1, 2, 0, 1)  # 1 переменная: 1 строка, 2 столбца
+    assert get_kmap_dimensions(2) == (2, 2, 1, 1)  # 2 переменные: 2 строки, 2 столбца
+    assert get_kmap_dimensions(3) == (2, 4, 1, 2)  # 3 переменные: 2 строки, 4 столбца
+    assert get_kmap_dimensions(4) == (4, 4, 2, 2)  # 4 переменные: 4 строки, 4 столбца
+    assert get_kmap_dimensions(5) == (4, 8, 2, 3)  # 5 переменных: 4 строки, 8 столбцов
+
+    # Тестируем неподдерживаемые размерности
+    assert get_kmap_dimensions(0) == (None, None, None, None)  # 0 переменных
+    assert get_kmap_dimensions(6) == (None, None, None, None)  # 6 переменных (не поддерживается)
+
+    # Проверяем, что возвращаемые значения - кортежи из 4 элементов
+    assert len(get_kmap_dimensions(1)) == 4
+    assert len(get_kmap_dimensions(5)) == 4
+    assert len(get_kmap_dimensions(6)) == 4
 
 def test_complex_expression():
     expr = "(a -> b) & (!a | c)"
