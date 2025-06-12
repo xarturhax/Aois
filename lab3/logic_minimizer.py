@@ -339,7 +339,10 @@ def format_kmap_for_display(kmap, params):
 
     # Create header
     if row_vars > 0:
-        header = [f"{variables[0]}\\{''.join(variables[1:])}"]
+        # Join all row variables for header
+        row_vars_str = "".join(variables[:row_vars])
+        col_vars_str = "".join(variables[row_vars:])
+        header = [f"{row_vars_str}\\{col_vars_str}"]
     else:
         header = [""]
 
